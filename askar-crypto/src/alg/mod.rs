@@ -60,6 +60,10 @@ pub mod p384;
 #[cfg_attr(docsrs, doc(cfg(feature = "p256_hardware")))]
 pub mod p256_hardware;
 
+#[cfg(feature = "mldsa44")]
+#[cfg_attr(docsrs, doc(cfg(feature = "mldsa44")))]
+pub mod mldsa44;
+
 /// Supported key algorithms
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Zeroize)]
 #[cfg_attr(feature = "arbitrary", derive(Arbitrary))]
@@ -76,6 +80,8 @@ pub enum KeyAlg {
     X25519,
     /// Elliptic Curve key for signing or key exchange
     EcCurve(EcCurves),
+    /// ML-DSA-44 signing key
+    MLDSA44,
 }
 
 impl KeyAlg {
@@ -98,6 +104,7 @@ impl KeyAlg {
             Self::EcCurve(EcCurves::Secp256k1) => "k256",
             Self::EcCurve(EcCurves::Secp256r1) => "p256",
             Self::EcCurve(EcCurves::Secp384r1) => "p384",
+            Self::MLDSA44 => "mldsa44",
         }
     }
 }
@@ -135,6 +142,7 @@ impl FromStr for KeyAlg {
             a if a == "k256" || a == "secp256k1" => Ok(Self::EcCurve(EcCurves::Secp256k1)),
             a if a == "p256" || a == "secp256r1" => Ok(Self::EcCurve(EcCurves::Secp256r1)),
             a if a == "p384" || a == "secp384r1" => Ok(Self::EcCurve(EcCurves::Secp384r1)),
+            a if a == "mldsa44" => Ok(Self::MLDSA44),
             _ => Err(err_msg!(Unsupported, "Unknown key algorithm")),
         }
     }

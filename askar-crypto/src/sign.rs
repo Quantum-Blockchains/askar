@@ -55,6 +55,8 @@ pub enum SignatureType {
     ES256K,
     /// Elliptic curve DSA using P-384 and SHA-384
     ES384,
+    /// Standard signature output for ML-DSA-44
+    MLDSA44,
 }
 
 impl FromStr for SignatureType {
@@ -66,6 +68,7 @@ impl FromStr for SignatureType {
             a if a == "es256" => Ok(Self::ES256),
             a if a == "es256k" => Ok(Self::ES256K),
             a if a == "es384" => Ok(Self::ES384),
+            a if a == "mldsa44" => Ok(Self::MLDSA44),
             _ => Err(err_msg!(Unsupported, "Unknown signature algorithm")),
         }
     }
@@ -77,6 +80,7 @@ impl SignatureType {
         match self {
             Self::EdDSA | Self::ES256 | Self::ES256K => 64,
             Self::ES384 => 96,
+            Self::MLDSA44 => 2420,
         }
     }
 }

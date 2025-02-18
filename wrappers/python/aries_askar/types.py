@@ -19,6 +19,7 @@ class KeyAlg(Enum):
     K256 = "k256"
     P256 = "p256"
     P384 = "p384"
+    ML_DSA_44 = "mldsa44"
 
     @classmethod
     def from_key_alg(cls, alg: str) -> Optional["KeyAlg"]:

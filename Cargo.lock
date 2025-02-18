@@ -235,6 +235,7 @@ dependencies = [
  "k256",
  "p256",
  "p384",
+ "pqcrypto",
  "rand",
  "serde",
  "serde-json-core",
@@ -501,6 +502,8 @@ version = "1.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13208fcbb66eaeffe09b99fffbe1af420f00a7b35aa99ad683dfc1aa76145229"
 dependencies = [
+ "jobserver",
+ "libc",
  "shlex",
 ]
 
@@ -931,6 +934,12 @@ name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
+
+[[package]]
+name = "dunce"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "ecdsa"
@@ -1643,6 +1652,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
+name = "jobserver"
+version = "0.1.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48d1dbcbbeb6a7fec7e059840aa538bd62aaccf972c7346c4d9d2059312853d0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "js-sys"
 version = "0.3.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2089,6 +2107,109 @@ checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
  "zerocopy",
 ]
+
+[[package]]
+name = "pqcrypto"
+version = "0.18.1"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "pqcrypto-classicmceliece",
+ "pqcrypto-falcon",
+ "pqcrypto-hqc",
+ "pqcrypto-mldsa",
+ "pqcrypto-mlkem",
+ "pqcrypto-sphincsplus",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-classicmceliece"
+version = "0.2.0"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-falcon"
+version = "0.4.0"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-hqc"
+version = "0.2.1"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-internals"
+version = "0.2.8"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "dunce",
+ "getrandom 0.2.15",
+ "libc",
+]
+
+[[package]]
+name = "pqcrypto-mldsa"
+version = "0.1.0"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "paste",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-mlkem"
+version = "0.1.0"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-sphincsplus"
+version = "0.7.0"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
+dependencies = [
+ "cc",
+ "glob",
+ "libc",
+ "pqcrypto-internals",
+ "pqcrypto-traits",
+]
+
+[[package]]
+name = "pqcrypto-traits"
+version = "0.3.5"
+source = "git+https://github.com/Quantum-Blockchains/pqcrypto.git?branch=kostia/ml-dsa-44_add_fn_generate_keypair_from_seed#84221dbef59a40a387d7f787ab8f935dd27c2c3c"
 
 [[package]]
 name = "primeorder"
