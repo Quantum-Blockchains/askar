@@ -5,7 +5,7 @@ use crate::{
     buffer::{ArrayKey, WriteBuffer},
     error::Error,
     generic_array::typenum::{Sum, U1000, U312, U32},
-    // jwk::{FromJwk, JwkEncoder, JwkParts, ToJwk},
+    jwk::{FromJwk, JwkEncoder, JwkParts, ToJwk},
     random::KeyMaterial,
     repr::{KeyGen, KeyMeta, KeyPublicBytes, KeySecretBytes, KeypairBytes, KeypairMeta},
     sign::{KeySigVerify, KeySign, SignatureType},
@@ -14,10 +14,10 @@ use core::fmt::{self, Debug, Formatter};
 
 use pqcrypto::traits::sign::{PublicKey, SecretKey};
 use pqcrypto::{sign::mldsa44, traits::sign::DetachedSignature};
-
+use zeroize::{Zeroize, ZeroizeOnDrop};
 // use crystals_dilithium::ml_dsa_44::{Keypair, PublicKey, SecretKey, KEYPAIRBYTES, PUBLICKEYBYTES, SECRETKEYBYTES, SIGNBYTES};
 
-const MLDSA44_SECRET_LENGTH: usize = 32;
+const MLDSA44_SECRET_LENGTH: usize = 32; 
 const MLDSA44_SIGNATURE_LENGTH: usize = mldsa44::signature_bytes();
 const MLDSA44_PUBLIC_KEY_LENGTH: usize = mldsa44::public_key_bytes();
 const MLDSA44_SECRET_KEY_LENGTH: usize = mldsa44::secret_key_bytes();
@@ -25,6 +25,11 @@ const MLDSA44_KEYPAIR_LENGTH: usize = MLDSA44_SECRET_LENGTH + MLDSA44_PUBLIC_KEY
 
 type U1312 = Sum<U1000, U312>;
 type U1344 = Sum<U1312, U32>;
+
+/// The 'kty' value of an ML-DSA-44 key JWK
+pub const JWK_KEY_TYPE: &str = "LATTICE";
+/// The 'crv' value of an ML-DSA-44 JWK
+pub const JWK_CURVE: &str = "ML-DSA-44";
 
 /// An ML-DSA-44 public key or keypair
 #[derive(Clone)]
@@ -209,14 +214,60 @@ impl KeySigVerify for MLDSA44KeyPair {
     }
 }
 
-// impl Drop for MLDSA44KeyPair {
-//     fn drop(&mut self) {
-//         self.secret.zeroize();
-//         self.public.zeroize();
-//     }
-// }
+impl ToJwk for MLDSA44KeyPair {
+    fn encode_jwk(&self, enc: &mut dyn JwkEncoder) -> Result<(), Error> {
+        enc.add_str("crv", JWK_CURVE)?;
+        enc.add_str("kty", JWK_KEY_TYPE)?;
+        self.with_public_bytes(|buf| enc.add_as_base64("x", buf))?;
+        if enc.is_secret() {
+            self.with_secret_bytes(|buf| {
+                if let Some(sk) = buf {
+                    enc.add_as_base64("d", sk)
+                } else {
+                    Ok(())
+                }
+            })?;
+        }
+        Ok(())
+    }
+}
 
-// impl ZeroizeOnDrop for Ed25519KeyPair {}
+impl FromJwk for MLDSA44KeyPair {
+    fn from_jwk_parts(jwk: JwkParts<'_>) -> Result<Self, Error> {
+        if jwk.kty != JWK_KEY_TYPE {
+            return Err(err_msg!(InvalidKeyData, "Unsupported key type"));
+        }
+        if jwk.crv != JWK_CURVE {
+            return Err(err_msg!(InvalidKeyData, "Unsupported key algorithm"));
+        }
+        ArrayKey::<U32>::temp(|pk_arr| {
+            if jwk.x.decode_base64(pk_arr)? != pk_arr.len() {
+                Err(err_msg!(InvalidKeyData))
+            } else if jwk.d.is_some() {
+                ArrayKey::<U32>::temp(|sk_arr| {
+                    if jwk.d.decode_base64(sk_arr)? != sk_arr.len() {
+                        Err(err_msg!(InvalidKeyData))
+                    } else {
+                        let kp = MLDSA44KeyPair::from_secret_bytes(sk_arr)?;
+                        // kp.check_public_bytes(pk_arr)?;
+                        Ok(kp)
+                    }
+                })
+            } else {
+                MLDSA44KeyPair::from_public_bytes(pk_arr)
+            }
+        })
+    }
+}
+
+impl Drop for MLDSA44KeyPair {
+    fn drop(&mut self) {
+        self.secret.zeroize();
+        self.public.zeroize();
+    }
+}
+
+impl ZeroizeOnDrop for MLDSA44KeyPair {}
 
 /// A ML-DSA-44 secret key used for signing
 #[derive(Debug, Clone)]
@@ -232,6 +283,8 @@ impl MLDSA44SigningKey {
             .unwrap()
     }
 }
+
+impl ZeroizeOnDrop for MLDSA44SigningKey {}
 
 #[cfg(test)]
 mod tests {

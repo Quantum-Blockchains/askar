@@ -1,6 +1,6 @@
 __pycache__
 *.dylib
-*.so
+# *.so
 *.dll
 *.db
 *.egg-info

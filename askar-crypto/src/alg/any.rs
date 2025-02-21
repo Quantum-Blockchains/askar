@@ -40,6 +40,9 @@ use super::p384::{self, P384KeyPair};
 #[cfg(feature = "p256_hardware")]
 use super::p256_hardware::P256HardwareKeyPair;
 
+#[cfg(feature = "mldsa44")]
+use super::mldsa44::{self, MLDSA44KeyPair};
+
 use super::{HasKeyAlg, HasKeyBackend, KeyAlg};
 use crate::{
     backend::KeyBackend,
@@ -282,6 +285,8 @@ fn generate_any_with_rng<R: AllocKey>(alg: KeyAlg, rng: impl KeyMaterial) -> Res
         KeyAlg::EcCurve(EcCurves::Secp256r1) => P256KeyPair::generate(rng).map(R::alloc_key),
         #[cfg(feature = "p384")]
         KeyAlg::EcCurve(EcCurves::Secp384r1) => P384KeyPair::generate(rng).map(R::alloc_key),
+        #[cfg(feature = "mldsa44")]
+        KeyAlg::MLDSA44 => MLDSA44KeyPair::generate(rng).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -352,6 +357,8 @@ fn from_public_bytes_any<R: AllocKey>(alg: KeyAlg, public: &[u8]) -> Result<R, E
         KeyAlg::EcCurve(EcCurves::Secp384r1) => {
             P384KeyPair::from_public_bytes(public).map(R::alloc_key)
         }
+        #[cfg(feature = "mldsa44")]
+        KeyAlg::MLDSA44 => MLDSA44KeyPair::from_public_bytes(public).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -423,6 +430,8 @@ fn from_secret_bytes_any<R: AllocKey>(alg: KeyAlg, secret: &[u8]) -> Result<R, E
         KeyAlg::EcCurve(EcCurves::Secp384r1) => {
             P384KeyPair::from_secret_bytes(secret).map(R::alloc_key)
         }
+        #[cfg(feature = "mldsa44")]
+        KeyAlg::MLDSA44 => MLDSA44KeyPair::from_secret_bytes(secret).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -567,6 +576,11 @@ fn convert_key_any<R: AllocKey>(key: &AnyKey, alg: KeyAlg) -> Result<R, Error> {
             key.assume::<Ed25519KeyPair>(),
         )
         .map(R::alloc_key)?),
+        // #[cfg(feature = "mldsa44")]
+        // (KeyAlg::MLDSA44, KeyAlg::X25519) => Ok(<X25519KeyPair as TryFrom<_>>::try_from(
+        //     key.assume::<Ed25519KeyPair>(),
+        // )
+        // .map(R::alloc_key)?),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -640,6 +654,8 @@ fn from_jwk_any<R: AllocKey>(jwk: JwkParts<'_>) -> Result<R, Error> {
         ("EC", p256::JWK_CURVE, _) => P256KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         #[cfg(feature = "p384")]
         ("EC", p384::JWK_CURVE, _) => P384KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
+        #[cfg(feature = "mldsa44")]
+        ("OKP", mldsa44::JWK_CURVE, _) => MLDSA44KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         _ => Err(err_msg!(Unsupported, "Unsupported JWK for key import")),
     }
 }
@@ -750,6 +766,13 @@ macro_rules! match_key_alg {
         }
         match_key_alg!(@ $($rest)*; $key, $alg)
     }};
+    (@ MLDSA44 $($rest:ident)*; $key:ident, $alg:ident) => {{
+        #[cfg(feature = "mldsa44")]
+        if $alg == KeyAlg::MLDSA44 {
+            return Ok($key.assume::<MLDSA44KeyPair>())
+        }
+        match_key_alg!(@ $($rest)*; $key, $alg)
+    }};
 }
 
 impl AnyKey {
@@ -775,6 +798,7 @@ impl AnyKey {
             P256,
             P384,
             X25519,
+            MLDSA44,
             "Secret key export is not supported for this key type"
         }
     }
@@ -790,6 +814,7 @@ impl AnyKey {
             P256Hardware,
             P384,
             X25519,
+            MLDSA44,
             "Public key export is not supported for this key type"
         }
     }
@@ -896,6 +921,7 @@ impl ToJwk for AnyKey {
             P256Hardware,
             P384,
             X25519,
+            MLDSA44,
             "JWK export is not supported for this key type"
         }?;
         key.encode_jwk(enc)
@@ -917,6 +943,7 @@ impl KeySign for AnyKey {
             P256,
             P256Hardware,
             P384,
+            MLDSA44,
             "Signing is not supported for this key type"
         }?;
         key.write_signature(message, sig_type, out)
@@ -938,6 +965,7 @@ impl KeySigVerify for AnyKey {
             P256,
             P256Hardware,
             P384,
+            MLDSA44,
             "Signature verification is not supported for this key type"
         }?;
         key.verify_signature(message, signature, sig_type)

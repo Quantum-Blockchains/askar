@@ -83,6 +83,22 @@ def test_ed25519():
     assert jwk["crv"] == "Ed25519"
 
 
+def test_mldsa44():
+    key = Key.generate(KeyAlg.ML_DSA_44)
+    assert key.algorithm == KeyAlg.ML_DSA_44
+    message = b"test message"
+    sig = key.sign_message(message)
+    assert key.verify_signature(message, sig)
+
+    jwk = json.loads(key.get_jwk_public())
+    assert jwk["kty"] == "LATTICE"
+    assert jwk["crv"] == "ML-DSA-44"
+
+    jwk = json.loads(key.get_jwk_secret())
+    assert jwk["kty"] == "LATTICE"
+    assert jwk["crv"] == "ML-DSA-44"
+
+
 @pytest.mark.parametrize(
     "key_alg",
     [KeyAlg.K256, KeyAlg.P256, KeyAlg.P384],
