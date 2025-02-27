@@ -671,6 +671,11 @@ class Session:
         if result_handle:
             print("-- ASKAR yes")
             tmp = next(t1, None)
+            if tmp:
+                print("-- ASKAR tak")
+                print("-- ASKAR tmp")
+            else:
+                print("-- ASKAR nie")
         else:
             print("-- ASKAR no")
             tmp = None
