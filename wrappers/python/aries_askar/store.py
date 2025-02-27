@@ -668,7 +668,13 @@ class Session:
         print("-- result_handle.get_metadata: ", result_handle.get_metadata(0))
         t1 = iter(KeyEntryList(result_handle, 1))
         print("-- t1: ", t1)
-        tmp = (next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None)
+        if result_handle:
+            print("-- ASKAR yes")
+            tmp = next(t1, None)
+        else:
+            print("-- ASKAR no")
+            tmp = None
+        # tmp = next(t1, None) if result_handle else None
         print("-- tmp: ", tmp)
         print("-- ASKAR fetch_key - END")
         return tmp
