@@ -673,14 +673,13 @@ class Session:
             tmp = next(t1, None)
             if tmp:
                 print("-- ASKAR tak")
-                print("-- ASKAR tmp: " + tmp)
+                print("-- ASKAR tmp: ", tmp.ke())
             else:
                 print("-- ASKAR nie")
         else:
             print("-- ASKAR no")
             tmp = None
         # tmp = next(t1, None) if result_handle else None
-        print("-- tmp: ", tmp)
         print("-- ASKAR fetch_key - END")
         return tmp
 
