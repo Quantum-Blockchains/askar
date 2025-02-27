@@ -243,7 +243,6 @@ class KeyEntryListHandle(ArcHandle):
 
     def load_key(self, index: int) -> "LocalKeyHandle":
         """Load the key instance."""
-        print("-- ASKAR load_key - START")
         handle = LocalKeyHandle()
         Lib().invoke(
             "askar_key_entry_list_load_local",
@@ -252,7 +251,6 @@ class KeyEntryListHandle(ArcHandle):
             index,
             byref(handle),
         )
-        print("-- ASKAR load_key - START")
         return handle
 
 

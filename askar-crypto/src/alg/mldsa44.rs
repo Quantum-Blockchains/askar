@@ -216,7 +216,6 @@ impl KeySigVerify for MLDSA44KeyPair {
 
 impl ToJwk for MLDSA44KeyPair {
     fn encode_jwk(&self, enc: &mut dyn JwkEncoder) -> Result<(), Error> {
-        println!("RUST mldsa44 encode_jwk");
         enc.add_str("crv", JWK_CURVE)?;
         enc.add_str("kty", JWK_KEY_TYPE)?;
         self.with_public_bytes(|buf| enc.add_as_base64("x", buf))?;
@@ -235,37 +234,26 @@ impl ToJwk for MLDSA44KeyPair {
 
 impl FromJwk for MLDSA44KeyPair {
     fn from_jwk_parts(jwk: JwkParts<'_>) -> Result<Self, Error> {
-        println!("RUST mldsa44 from_jwk_parts");
-        println!("RUST mldsa44 jwk: {:?}", jwk);
         if jwk.kty != JWK_KEY_TYPE {
-            println!("1");
             return Err(err_msg!(InvalidKeyData, "Unsupported key type"));
         }
         if jwk.crv != JWK_CURVE {
-            println!("2");
             return Err(err_msg!(InvalidKeyData, "Unsupported key algorithm"));
         }
-        println!("3");
         ArrayKey::<U1312>::temp(|pk_arr| {
             if jwk.x.decode_base64(pk_arr)? != pk_arr.len() {
-                println!("4");
                 Err(err_msg!(InvalidKeyData))
             } else if jwk.d.is_some() {
-                println!("5");
                 ArrayKey::<U32>::temp(|sk_arr| {
-                    println!("6");
                     if jwk.d.decode_base64(sk_arr)? != sk_arr.len() {
-                        println!("7");
                         Err(err_msg!(InvalidKeyData))
                     } else {
-                        println!("8");
                         let kp = MLDSA44KeyPair::from_secret_bytes(sk_arr)?;
                         // kp.check_public_bytes(pk_arr)?;
                         Ok(kp)
                     }
                 })
             } else {
-                println!("9");
                 MLDSA44KeyPair::from_public_bytes(pk_arr)
             }
         })

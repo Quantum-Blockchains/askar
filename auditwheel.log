@@ -5,10 +5,10 @@ the following platform tag: "manylinux_2_34_x86_64".
 The wheel references external versioned symbols in these
 system-provided shared libraries: libm.so.6 with versions
 {'GLIBC_2.29'}, libgcc_s.so.1 with versions {'GCC_4.2.0', 'GCC_3.0',
-'GCC_3.3'}, libc.so.6 with versions {'GLIBC_2.3', 'GLIBC_2.18',
-'GLIBC_2.3.4', 'GLIBC_2.34', 'GLIBC_2.33', 'GLIBC_2.16',
-'GLIBC_2.2.5', 'GLIBC_2.4', 'GLIBC_2.14', 'GLIBC_2.9', 'GLIBC_2.3.2',
-'GLIBC_2.17', 'GLIBC_2.32', 'GLIBC_2.25', 'GLIBC_2.28', 'GLIBC_2.7'}
+'GCC_3.3'}, libc.so.6 with versions {'GLIBC_2.3.4', 'GLIBC_2.14',
+'GLIBC_2.25', 'GLIBC_2.9', 'GLIBC_2.3', 'GLIBC_2.7', 'GLIBC_2.3.2',
+'GLIBC_2.34', 'GLIBC_2.28', 'GLIBC_2.4', 'GLIBC_2.18', 'GLIBC_2.33',
+'GLIBC_2.32', 'GLIBC_2.17', 'GLIBC_2.2.5', 'GLIBC_2.16'}
 
 This constrains the platform tag to "manylinux_2_34_x86_64". In order
 to achieve a more compatible tag, you would need to recompile a new

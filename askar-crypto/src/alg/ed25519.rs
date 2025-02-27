@@ -252,8 +252,6 @@ impl ToJwk for Ed25519KeyPair {
 
 impl FromJwk for Ed25519KeyPair {
     fn from_jwk_parts(jwk: JwkParts<'_>) -> Result<Self, Error> {
-        println!("RUST mldsa44 from_jwk_parts");
-        println!("RUST mldsa44 jwk: {:?}", jwk);
         if jwk.kty != JWK_KEY_TYPE {
             return Err(err_msg!(InvalidKeyData, "Unsupported key type"));
         }

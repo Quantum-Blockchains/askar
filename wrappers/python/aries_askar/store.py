@@ -183,7 +183,6 @@ class KeyEntryList:
 
     def __init__(self, handle: KeyEntryListHandle, len: int = None):
         """Initialize the KeyEntryList instance."""
-        print("-- ASKAR KeyEntryList __init__ - START")
         self._handle = handle
         self._pos = 0
         if handle:
@@ -192,8 +191,6 @@ class KeyEntryList:
             )
         else:
             self._len = 0
-        print("-- _len: ", self._len)
-        print("-- ASKAR KeyEntryList __init__ - START")
 
     @property
     def handle(self) -> KeyEntryListHandle:
@@ -655,32 +652,14 @@ class Session:
         self, name: str, *, for_update: bool = False
     ) -> Optional[KeyEntry]:
         """Fetch a key in the store by name."""
-        print("-- ASKAR fetch_key - START")
-        print("-- name: " + name[:10] + "..." + name[-10:])
         if not self._handle:
             raise AskarError(
                 AskarErrorCode.WRAPPER, "Cannot fetch key from closed session"
             )
         result_handle = await bindings.session_fetch_key(self._handle, name, for_update)
-        print("-- result_handle: ", result_handle)
-        print("-- result_handle.get_algorithm: ", result_handle.get_algorithm(0))
-        print("-- result_handle.get_name: ", result_handle.get_name(0))
-        print("-- result_handle.get_metadata: ", result_handle.get_metadata(0))
-        t1 = iter(KeyEntryList(result_handle, 1))
-        print("-- t1: ", t1)
-        if result_handle:
-            print("-- ASKAR yes")
-            tmp = next(t1, None)
-            if tmp:
-                print("-- ASKAR tak")
-            else:
-                print("-- ASKAR nie")
-        else:
-            print("-- ASKAR no")
-            tmp = None
-        # tmp = next(t1, None) if result_handle else None
-        print("-- ASKAR fetch_key - END")
-        return tmp
+        return (
+            next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None
+        )
 
     async def fetch_all_keys(
         self,
