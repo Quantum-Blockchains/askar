@@ -238,25 +238,34 @@ impl FromJwk for MLDSA44KeyPair {
         println!("RUST mldsa44 from_jwk_parts");
         println!("RUST mldsa44 jwk: {:?}", jwk);
         if jwk.kty != JWK_KEY_TYPE {
+            println!("1");
             return Err(err_msg!(InvalidKeyData, "Unsupported key type"));
         }
         if jwk.crv != JWK_CURVE {
+            println!("2");
             return Err(err_msg!(InvalidKeyData, "Unsupported key algorithm"));
         }
-        ArrayKey::<U32>::temp(|pk_arr| {
+        println!("3");
+        ArrayKey::<U1312>::temp(|pk_arr| {
             if jwk.x.decode_base64(pk_arr)? != pk_arr.len() {
+                println!("4");
                 Err(err_msg!(InvalidKeyData))
             } else if jwk.d.is_some() {
+                println!("5");
                 ArrayKey::<U32>::temp(|sk_arr| {
+                    println!("6");
                     if jwk.d.decode_base64(sk_arr)? != sk_arr.len() {
+                        println!("7");
                         Err(err_msg!(InvalidKeyData))
                     } else {
+                        println!("8");
                         let kp = MLDSA44KeyPair::from_secret_bytes(sk_arr)?;
                         // kp.check_public_bytes(pk_arr)?;
                         Ok(kp)
                     }
                 })
             } else {
+                println!("9");
                 MLDSA44KeyPair::from_public_bytes(pk_arr)
             }
         })
@@ -324,47 +333,50 @@ mod tests {
     //     assert_eq!(&x_pair[32..], x_pk);
     // }
 
-    // #[test]
-    // fn jwk_expected() {
-    //     // from https://www.connect2id.com/blog/nimbus-jose-jwt-6
-    //     // {
-    //     //     "kty" : "OKP",
-    //     //     "crv" : "Ed25519",
-    //     //     "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
-    //     //     "d"   : "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"
-    //     //     "use" : "sig",
-    //     //     "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
-    //     //   }
-    //     let test_pvt_b64 = "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A";
-    //     let test_pub_b64 = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
-    //     let test_pvt = base64::engine::general_purpose::URL_SAFE_NO_PAD
-    //         .decode(test_pvt_b64)
-    //         .unwrap();
-    //     let kp = Ed25519KeyPair::from_secret_bytes(&test_pvt).expect("Error creating signing key");
-    //     let jwk = kp
-    //         .to_jwk_public(None)
-    //         .expect("Error converting public key to JWK");
-    //     let jwk = JwkParts::try_from_str(&jwk).expect("Error parsing JWK output");
-    //     assert_eq!(jwk.kty, JWK_KEY_TYPE);
-    //     assert_eq!(jwk.crv, JWK_CURVE);
-    //     assert_eq!(jwk.x, "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo");
-    //     let pk_load = Ed25519KeyPair::from_jwk_parts(jwk).unwrap();
-    //     assert_eq!(kp.to_public_bytes(), pk_load.to_public_bytes());
+    #[test]
+    fn jwk_expected() {
+        // from https://www.connect2id.com/blog/nimbus-jose-jwt-6
+        // {
+        //     "kty" : "OKP",
+        //     "crv" : "Ed25519",
+        //     "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+        //     "d"   : "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"
+        //     "use" : "sig",
+        //     "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
+        //   }
+        let test_pvt_b64 = base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(b"000000000000000000000000Trustee1");
+        let test_pub_b64 = base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(&hex!("af221edaa593fa1c944d1314f09d1a57c365d0b3fe6326193905a3a7f6e380ef66d27bb69c06950eaf79b5a392d7e7e776f92c51218b2dbe31f6571a65ee5e60e64ea64311bbd90f502543e1616f4927af7aaa1173db940165eb43d7f7024c95439db39d03a7d708c34d209df3148d5d7df923541eca13b3a94fe907182c7192c41ebea3f9c8c2b9fba09e287bbeafa0053c3cf544954ec7a2557da044bb65791b774c0c70b1a3e15f391b338f5fff9a64eaf101bd2006254a71cedbaca30b21db2864b8d9af71ec0c3278003cc4f239087a420ca1200e28eae752bf4c9773c92f03af8de0cbf18838312a29607af68b44cf8c578fc085463c1eb4f1c51149356f677389a75ab99045daf7f230578546233faa36e9e83fcaa4d9404e5f91e7616bb92dc71c750f65808868f6654837d317248ba4d2949fc40cafe004ff3c3b67230d430b49fa4c688a9a2a2f10576fef7f487bf6071647fe8b2c0d508c27d953504572f56c84283223a46d449884aaadff4e52cd67d5bf83e455ed458eeb5a131207cff52e7833baa22baced538c67a5c0447c7885110919244b09a5baa4af64389ec2eb57b7858a7d2146a8481b6c7d32f4a83cafe5b75b17df7f06625f11fdca40307de5220e63fb2190c21d88221fbf46a133ecc8bc654ce1af7afc38cbafe2a5495b27b42a297a4c04bb041ddf0b1bf5760734e747f1d8b797c99d013c71ab1c26aa09df221671dd1e059e01c17381f8ddf2522c3342ee61895ffb5b70b17007cf982aa672eb6d1f658c582bc176676655c00e7f5d8f68e89434c24028e0af0f09cf2af8d2cdd2ce23958c65ea5028a492ad30c98efaddbf2d416d83aa248aa1dcd17254b7a484f563a5fdef7ae47919c266060d4997f069bf1a5c301484137faa3eca5beb5b1465e2a7ace3348c14f6e156c0a52cff05e0db680ded2564b2e4afa810377292b4707256727aeffadfc13d8cf2a97bb64871a3501210c8393a0fdee605e5d3132ab15349610154ca066188a5890cbbd907f42b5b122d720491da18477852ccb7b741ca6f4e378c017276f72c4b268e87ae5d1a464f7ca9a859991a5fdac94f20769c21dcb708318812dab05c298112a40a82518d54fcb36c872e0c604b2485570e685d7dc1a01a93043303bd2c8ba96e864c10b0ab0c02230c9384e5e6075f5a34260daa1d754173ecb8b4b8e2c50c23e384c86c9a817e46baf5c5e1ea26c995a7dc30a8593783ecd4c367303630647ae08399d00fb9cb3f7d2e794eef21d21d7ed55305048b1b694ebe1ee68e3bdbd251f613484d35609e8600ea6a439b7068e1e99e0477d3bf8f7e7954091071f5bc4385ced5635213804fbe04cec95556b65d925f7e1f055362060d4b029b4324885de0a30e516e4a54b46c700f6dbc1b9e4dc4cbc44f155ca09f72b458eb6d35d96934221d6b382171cb05982cc4ab4854d045d8d342a541ceee06a7a5d6960fc8e424062e755019bc3fa4781703d724d45743aac19e1e8207cc6e304d2695f46614d65cf747c2d644752f24df928eee00bf25fd50c26dc471d81c06d470dad4cfdef9d0212d6354d3fba5735ac4cfa6e3b6555ebf0553bf83e74e4162c3cd895a20bd30018b4e06dbbc93fae2db8cda2c87f34a3f601c1fe13b7a197632bd3765a09a17afe4a7ea07393737ceec66bf08ae934addeb1090d61b09c304cee11273c69cb6ccd8c63e23870a2cc4ddb1071dfa4874379575e56a9442b538ab1d4c57ed1ab20b8e7ae29d35f51a83ef0739e9034a0cb7939a9fdc9d54122bab0134e9a202333718a28e8b04d423496f27b20407c57db6387f4a3ba22de3dc08f1abac2f7cd67e7416bb4f"));
 
-    //     let jwk = kp
-    //         .to_jwk_secret(None)
-    //         .expect("Error converting private key to JWK");
-    //     let jwk = JwkParts::from_slice(&jwk).expect("Error parsing JWK output");
-    //     assert_eq!(jwk.kty, JWK_KEY_TYPE);
-    //     assert_eq!(jwk.crv, JWK_CURVE);
-    //     assert_eq!(jwk.x, test_pub_b64);
-    //     assert_eq!(jwk.d, test_pvt_b64);
-    //     let sk_load = Ed25519KeyPair::from_jwk_parts(jwk).unwrap();
-    //     assert_eq!(
-    //         kp.to_keypair_bytes().unwrap(),
-    //         sk_load.to_keypair_bytes().unwrap()
-    //     );
-    // }
+        // let test_pvt_b64 = "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A";
+        // let test_pub_b64 = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
+        let test_pvt = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .decode(test_pvt_b64.as_str())
+            .unwrap();
+        let kp = MLDSA44KeyPair::from_secret_bytes(&test_pvt).expect("Error creating signing key");
+        let jwk = kp
+            .to_jwk_public(None)
+            .expect("Error converting public key to JWK");
+        let jwk = JwkParts::try_from_str(&jwk).expect("Error parsing JWK output");
+        assert_eq!(jwk.kty, JWK_KEY_TYPE);
+        assert_eq!(jwk.crv, JWK_CURVE);
+        assert_eq!(jwk.x, test_pub_b64.as_str());
+        let pk_load = MLDSA44KeyPair::from_jwk_parts(jwk).unwrap();
+        assert_eq!(kp.to_public_bytes(), pk_load.to_public_bytes());
+
+        let jwk = kp
+            .to_jwk_secret(None)
+            .expect("Error converting private key to JWK");
+        let jwk = JwkParts::from_slice(&jwk).expect("Error parsing JWK output");
+        assert_eq!(jwk.kty, JWK_KEY_TYPE);
+        assert_eq!(jwk.crv, JWK_CURVE);
+        assert_eq!(jwk.x, test_pub_b64.as_str());
+        assert_eq!(jwk.d, test_pvt_b64.as_str());
+        let sk_load = MLDSA44KeyPair::from_jwk_parts(jwk).unwrap();
+        assert_eq!(
+            kp.to_keypair_bytes().unwrap(),
+            sk_load.to_keypair_bytes().unwrap()
+        );
+    }
 
     #[test]
     fn sign_verify_expected() {
