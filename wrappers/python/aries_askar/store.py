@@ -652,11 +652,13 @@ class Session:
         self, name: str, *, for_update: bool = False
     ) -> Optional[KeyEntry]:
         """Fetch a key in the store by name."""
+        print("name: ", name)
         if not self._handle:
             raise AskarError(
                 AskarErrorCode.WRAPPER, "Cannot fetch key from closed session"
             )
         result_handle = await bindings.session_fetch_key(self._handle, name, for_update)
+        print("result_handle: ", result_handle)
         return (
             next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None
         )
