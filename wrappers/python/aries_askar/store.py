@@ -183,6 +183,7 @@ class KeyEntryList:
 
     def __init__(self, handle: KeyEntryListHandle, len: int = None):
         """Initialize the KeyEntryList instance."""
+        print("-- ASKAR KeyEntryList __init__ - START")
         self._handle = handle
         self._pos = 0
         if handle:
@@ -191,6 +192,8 @@ class KeyEntryList:
             )
         else:
             self._len = 0
+        print("-- _len: ", self._len)
+        print("-- ASKAR KeyEntryList __init__ - START")
 
     @property
     def handle(self) -> KeyEntryListHandle:
