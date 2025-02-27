@@ -673,7 +673,7 @@ class Session:
             tmp = next(t1, None)
             if tmp:
                 print("-- ASKAR tak")
-                print("-- ASKAR tmp: ", tmp.ke())
+                print("-- ASKAR tmp: ", tmp.key())
             else:
                 print("-- ASKAR nie")
         else:
