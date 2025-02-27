@@ -655,7 +655,7 @@ fn from_jwk_any<R: AllocKey>(jwk: JwkParts<'_>) -> Result<R, Error> {
         #[cfg(feature = "p384")]
         ("EC", p384::JWK_CURVE, _) => P384KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         #[cfg(feature = "mldsa44")]
-        ("OKP", mldsa44::JWK_CURVE, _) => MLDSA44KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
+        ("LATTICE", mldsa44::JWK_CURVE, _) => MLDSA44KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         _ => Err(err_msg!(Unsupported, "Unsupported JWK for key import")),
     }
 }
