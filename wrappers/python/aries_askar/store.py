@@ -652,19 +652,21 @@ class Session:
         self, name: str, *, for_update: bool = False
     ) -> Optional[KeyEntry]:
         """Fetch a key in the store by name."""
-        print("name: ", name)
+        print("-- ASKAR fetch_key - START")
+        print("-- name: " + name[:10] + "..." + name[-10:])
         if not self._handle:
             raise AskarError(
                 AskarErrorCode.WRAPPER, "Cannot fetch key from closed session"
             )
         result_handle = await bindings.session_fetch_key(self._handle, name, for_update)
-        print("result_handle: ", result_handle)
-        print("result_handle.get_algorithm: ", result_handle.get_algorithm())
-        print("result_handle.get_name: ", result_handle.get_name())
-        print("result_handle.get_metadata: ", result_handle.get_metadata())
-        return (
-            next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None
-        )
+        print("-- result_handle: ", result_handle)
+        print("-- result_handle.get_algorithm: ", result_handle.get_algorithm())
+        print("-- result_handle.get_name: ", result_handle.get_name())
+        print("-- result_handle.get_metadata: ", result_handle.get_metadata())
+        tmp = (next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None)
+        print("-- tmp: ", tmp)
+        print("-- ASKAR fetch_key - END")
+        return tmp
 
     async def fetch_all_keys(
         self,
