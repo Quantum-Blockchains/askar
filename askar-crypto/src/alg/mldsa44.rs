@@ -216,6 +216,7 @@ impl KeySigVerify for MLDSA44KeyPair {
 
 impl ToJwk for MLDSA44KeyPair {
     fn encode_jwk(&self, enc: &mut dyn JwkEncoder) -> Result<(), Error> {
+        println!("RUST mldsa44 encode_jwk");
         enc.add_str("crv", JWK_CURVE)?;
         enc.add_str("kty", JWK_KEY_TYPE)?;
         self.with_public_bytes(|buf| enc.add_as_base64("x", buf))?;
@@ -234,6 +235,8 @@ impl ToJwk for MLDSA44KeyPair {
 
 impl FromJwk for MLDSA44KeyPair {
     fn from_jwk_parts(jwk: JwkParts<'_>) -> Result<Self, Error> {
+        println!("RUST mldsa44 from_jwk_parts");
+        println!("RUST mldsa44 jwk: {:?}", jwk);
         if jwk.kty != JWK_KEY_TYPE {
             return Err(err_msg!(InvalidKeyData, "Unsupported key type"));
         }
