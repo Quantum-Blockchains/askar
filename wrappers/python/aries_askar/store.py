@@ -659,9 +659,9 @@ class Session:
             )
         result_handle = await bindings.session_fetch_key(self._handle, name, for_update)
         print("result_handle: ", result_handle)
-        print("result_handle.get_algorithm: ", result_handle.get_algorithm)
-        print("result_handle.get_name: ", result_handle.get_name)
-        print("result_handle.get_metadata: ", result_handle.get_metadata)
+        print("result_handle.get_algorithm: ", result_handle.get_algorithm())
+        print("result_handle.get_name: ", result_handle.get_name())
+        print("result_handle.get_metadata: ", result_handle.get_metadata())
         return (
             next(iter(KeyEntryList(result_handle, 1)), None) if result_handle else None
         )
