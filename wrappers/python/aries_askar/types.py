@@ -20,6 +20,7 @@ class KeyAlg(Enum):
     P256 = "p256"
     P384 = "p384"
     ML_DSA_44 = "mldsa44"
+    ML_KEM_512 = "mlkem512"
 
     @classmethod
     def from_key_alg(cls, alg: str) -> Optional["KeyAlg"]:

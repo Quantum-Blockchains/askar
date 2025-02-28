@@ -17,7 +17,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 aes = ["aes-core", "aes-gcm", "block-modes", "cbc", "cipher", "hmac"]
-all_keys = ["aes", "bls", "chacha", "ec_curves", "ed25519", "mldsa44"]
+all_keys = ["aes", "bls", "chacha", "ec_curves", "ed25519", "mldsa44", "mlkem512"]
 alloc = []
 any_key = ["alloc"]
 bls = ["bls12_381", "hkdf"]
@@ -31,6 +31,7 @@ p256_hardware = ["secure-env", "ec_curves", "uuid", "getrandom"]
 std = ["alloc", "serde/std", "serde-json-core/std", "std_rng", "uuid/std"]
 std_rng = ["getrandom", "rand/std", "rand/std_rng"]
 mldsa44 = ["pqcrypto"]
+mlkem512 = ["pqcrypto"]
 
 [dev-dependencies]
 base64 = { version = "0.22", default-features = false, features = ["alloc"] }

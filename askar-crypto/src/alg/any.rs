@@ -43,6 +43,9 @@ use super::p256_hardware::P256HardwareKeyPair;
 #[cfg(feature = "mldsa44")]
 use super::mldsa44::{self, MLDSA44KeyPair};
 
+#[cfg(feature = "mlkem512")]
+use super::mlkem512::{self, MLKEM512KeyPair};
+
 use super::{HasKeyAlg, HasKeyBackend, KeyAlg};
 use crate::{
     backend::KeyBackend,
@@ -287,6 +290,8 @@ fn generate_any_with_rng<R: AllocKey>(alg: KeyAlg, rng: impl KeyMaterial) -> Res
         KeyAlg::EcCurve(EcCurves::Secp384r1) => P384KeyPair::generate(rng).map(R::alloc_key),
         #[cfg(feature = "mldsa44")]
         KeyAlg::MLDSA44 => MLDSA44KeyPair::generate(rng).map(R::alloc_key),
+        #[cfg(feature = "mlkem512")]
+        KeyAlg::MLKEM512 => MLKEM512KeyPair::generate(rng).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -359,6 +364,8 @@ fn from_public_bytes_any<R: AllocKey>(alg: KeyAlg, public: &[u8]) -> Result<R, E
         }
         #[cfg(feature = "mldsa44")]
         KeyAlg::MLDSA44 => MLDSA44KeyPair::from_public_bytes(public).map(R::alloc_key),
+        #[cfg(feature = "mlkem512")]
+        KeyAlg::MLKEM512 => MLKEM512KeyPair::from_public_bytes(public).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -432,6 +439,8 @@ fn from_secret_bytes_any<R: AllocKey>(alg: KeyAlg, secret: &[u8]) -> Result<R, E
         }
         #[cfg(feature = "mldsa44")]
         KeyAlg::MLDSA44 => MLDSA44KeyPair::from_secret_bytes(secret).map(R::alloc_key),
+        #[cfg(feature = "mlkem512")]
+        KeyAlg::MLKEM512 => MLKEM512KeyPair::from_secret_bytes(secret).map(R::alloc_key),
         #[allow(unreachable_patterns)]
         _ => Err(err_msg!(
             Unsupported,
@@ -656,6 +665,7 @@ fn from_jwk_any<R: AllocKey>(jwk: JwkParts<'_>) -> Result<R, Error> {
         ("EC", p384::JWK_CURVE, _) => P384KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         #[cfg(feature = "mldsa44")]
         ("LATTICE", mldsa44::JWK_CURVE, _) => MLDSA44KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
+        ("LATTICE", mlkem512::JWK_CURVE, _) => MLKEM512KeyPair::from_jwk_parts(jwk).map(R::alloc_key),
         _ => Err(err_msg!(Unsupported, "Unsupported JWK for key import")),
     }
 }
@@ -773,6 +783,13 @@ macro_rules! match_key_alg {
         }
         match_key_alg!(@ $($rest)*; $key, $alg)
     }};
+    (@ MLKEM512 $($rest:ident)*; $key:ident, $alg:ident) => {{
+        #[cfg(feature = "mlkem512")]
+        if $alg == KeyAlg::MLKEM512 {
+            return Ok($key.assume::<MLKEM512KeyPair>())
+        }
+        match_key_alg!(@ $($rest)*; $key, $alg)
+    }};
 }
 
 impl AnyKey {
@@ -799,6 +816,7 @@ impl AnyKey {
             P384,
             X25519,
             MLDSA44,
+            MLKEM512,
             "Secret key export is not supported for this key type"
         }
     }
@@ -815,6 +833,7 @@ impl AnyKey {
             P384,
             X25519,
             MLDSA44,
+            MLKEM512,
             "Public key export is not supported for this key type"
         }
     }
@@ -922,6 +941,7 @@ impl ToJwk for AnyKey {
             P384,
             X25519,
             MLDSA44,
+            MLKEM512,
             "JWK export is not supported for this key type"
         }?;
         key.encode_jwk(enc)
