@@ -9,19 +9,18 @@ use subtle::ConstantTimeEq;
 // use x25519_dalek::{PublicKey, StaticSecret as SecretKey};
 use zeroize::Zeroizing;
 
-use super::{ed25519::Ed25519KeyPair, HasKeyAlg, HasKeyBackend, KeyAlg};
+use super::{HasKeyAlg, HasKeyBackend, KeyAlg};
 use crate::{
     buffer::{ArrayKey, WriteBuffer},
     error::Error,
     generic_array::typenum::{U64, U800, U864},
     jwk::{FromJwk, JwkEncoder, JwkParts, ToJwk},
-    kdf::KeyExchange,
     random::KeyMaterial,
     repr::{KeyGen, KeyMeta, KeyPublicBytes, KeySecretBytes, KeypairBytes, KeypairMeta},
 };
 
 use pqcrypto::kem::mlkem512;
-use pqcrypto::traits::kem::{PublicKey, SecretKey, SharedSecret, Ciphertext};
+use pqcrypto::traits::kem::{PublicKey, SharedSecret, Ciphertext};
 
 // FIXME: reject low-order points?
 // <https://github.com/tendermint/tmkms/pull/279>
@@ -40,6 +39,29 @@ pub const JWK_KEY_TYPE: &str = "LATTICE";
 pub const JWK_CURVE: &str = "ML-KEM-512";
 
 type Secret = [u8; SECRET_KEY_LENGTH];
+
+
+/// Signature creation operations
+pub trait KeyEncapsulate: KeyDecapsulate {
+    /// Create a signature of the requested type and write it to the
+    /// provided buffer.
+    fn write_encapsulate(
+        &self,
+        out_ss: &mut dyn WriteBuffer,
+        out_ct: &mut dyn WriteBuffer,
+    ) -> Result<(), Error>;
+}
+
+/// Signature verification operations
+pub trait KeyDecapsulate {
+    /// Check the validity of signature over a message with the
+    /// specified signature type.
+    fn write_decapsulate(
+        &self,
+        ct: &[u8],
+        out: &mut dyn WriteBuffer,
+    ) -> Result<(), Error>;
+}
 
 /// An X25519 public key or keypair
 #[derive(Clone)]
@@ -77,7 +99,7 @@ impl MLKEM512KeyPair {
     }
 
     /// encapsulate
-    pub fn encapsulate(&self) -> ([u8; 32], [u8; 768]) {
+    pub(crate) fn encapsulate(&self) -> ([u8; 32], [u8; 768]) {
         let (shared_secret, cipher_text) = mlkem512::encapsulate(&self.public);
         let mut ss = [0u8; 32];
         ss.copy_from_slice(shared_secret.as_bytes());
@@ -87,7 +109,7 @@ impl MLKEM512KeyPair {
     }
 
     /// decapsulate
-    pub fn decapsulate(&self, ct: &[u8]) -> [u8; 32] {
+    pub(crate) fn decapsulate(&self, ct: &[u8]) -> [u8; 32] {
         let (_, sk) = mlkem512::keypair_from_seed(self.secret.unwrap());
         let ct = mlkem512::Ciphertext::from_bytes(ct).unwrap();
         let shared_secret = mlkem512::decapsulate(&ct, &sk);
@@ -236,6 +258,30 @@ impl FromJwk for MLKEM512KeyPair {
     }
 }
 
+impl KeyEncapsulate for MLKEM512KeyPair {
+    fn write_encapsulate(
+            &self,
+            out_ss: &mut dyn WriteBuffer,
+            out_ct: &mut dyn WriteBuffer,
+        ) -> Result<(), Error> {
+        let (ss, ct) = self.encapsulate();
+        out_ss.buffer_write(&ss[..])?;
+        out_ct.buffer_write(&ct[..])?;
+        Ok(())
+    }
+}
+
+impl KeyDecapsulate for MLKEM512KeyPair {
+    fn write_decapsulate(
+            &self,
+            ct: &[u8],
+            out: &mut dyn WriteBuffer,
+        ) -> Result<(), Error> {
+        let ss = self.decapsulate(ct);
+        out.buffer_write(&ss[..])?;
+        Ok(())
+    }
+}
 // impl KeyExchange for MLKEM512KeyPair {
 //     fn write_key_exchange(&self, other: &Self, out: &mut dyn WriteBuffer) -> Result<(), Error> {
 //         match self.secret.as_ref() {

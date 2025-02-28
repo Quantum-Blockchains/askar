@@ -793,6 +793,29 @@ def key_aead_decrypt(
     return dec
 
 
+def key_encapsulate(handle: LocalKeyHandle) -> tuple[ByteBuffer, ByteBuffer]:
+    ss = ByteBuffer()
+    ct = ByteBuffer()
+    invoke(
+        "askar_key_encapsulate",
+        (LocalKeyHandle, POINTER((ByteBuffer, ByteBuffer))),
+        handle,
+        byref(ss, ct),
+    )
+    return [ss, ct]
+
+
+def key_decapsulate(handle: LocalKeyHandle, ct: Union[bytes, ByteBuffer]) -> ByteBuffer:
+    ss = ByteBuffer()
+    invoke(
+        "askar_key_decapsulate",
+        (LocalKeyHandle, FfiByteBuffer, POINTER(ByteBuffer)),
+        handle,
+        ct,
+        byref(ss),
+    )
+    return ss
+
 def key_sign_message(
     handle: LocalKeyHandle,
     message: Union[bytes, str, ByteBuffer],

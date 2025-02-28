@@ -46,7 +46,7 @@ use super::mldsa44::{self, MLDSA44KeyPair};
 #[cfg(feature = "mlkem512")]
 use super::mlkem512::{self, MLKEM512KeyPair};
 
-use super::{HasKeyAlg, HasKeyBackend, KeyAlg};
+use super::{mlkem512::{KeyDecapsulate, KeyEncapsulate}, HasKeyAlg, HasKeyBackend, KeyAlg};
 use crate::{
     backend::KeyBackend,
     buffer::{ResizeBuffer, SecretBytes, WriteBuffer},
@@ -945,6 +945,38 @@ impl ToJwk for AnyKey {
             "JWK export is not supported for this key type"
         }?;
         key.encode_jwk(enc)
+    }
+}
+
+impl KeyEncapsulate for AnyKey {
+    fn write_encapsulate(
+        &self,
+        out_ss: &mut dyn WriteBuffer,
+        out_ct: &mut dyn WriteBuffer
+    ) -> Result<(), Error> {
+        let key = match_key_alg! {
+            self,
+            &dyn KeyEncapsulate,
+            MLKEM512,
+            "Encapsulate is not supported for this key type"
+        }?;
+        key.write_encapsulate(out_ss, out_ct)
+    }
+}
+
+impl KeyDecapsulate for AnyKey {
+    fn write_decapsulate(
+        &self,
+        ct: &[u8],
+        out: &mut dyn WriteBuffer
+    ) -> Result<(), Error> {
+        let key = match_key_alg! {
+            self,
+            &dyn KeyDecapsulate,
+            MLKEM512,
+            "Decapsulate is not supported for this key type"
+        }?;
+        key.write_decapsulate(ct, out)
     }
 }
 

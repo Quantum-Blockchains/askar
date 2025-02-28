@@ -22,6 +22,8 @@ use crate::{
     error::Error,
 };
 
+use crate::crypto::alg::mlkem512::{KeyEncapsulate, KeyDecapsulate};
+
 #[cfg(feature = "mobile_secure_element")]
 use crate::crypto::alg::p256_hardware::P256HardwareKeyPair;
 
@@ -257,6 +259,21 @@ impl LocalKey {
             &mut sig,
         )?;
         Ok(sig)
+    }
+
+    /// encapsulate
+    pub fn encapsulate(&self) -> Result<(Vec<u8>, Vec<u8>), Error> {
+        let mut ss = Vec::new();
+        let mut ct = Vec::new();
+        self.inner.write_encapsulate(&mut ss, &mut ct)?;
+        Ok((ss, ct))
+    }
+
+    /// decapsulate
+    pub fn decapsulate(&self, ct: &[u8]) -> Result<Vec<u8>, Error> {
+        let mut ss = Vec::new();
+        self.inner.write_decapsulate(ct, &mut ss)?;
+        Ok(ss)
     }
 
     /// Verify a message signature with this private signing key or public verification key

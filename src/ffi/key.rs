@@ -362,6 +362,40 @@ pub extern "C" fn askar_key_sign_message(
 }
 
 #[no_mangle]
+pub extern "C" fn askar_key_encapsulate(
+    handle: LocalKeyHandle,
+    out_ss: *mut SecretBuffer,
+    out_ct: *mut SecretBuffer,
+) -> ErrorCode {
+    catch_err! {
+        trace!("Key encapsulate: {}", handle);
+        check_useful_c_ptr!(out_ss);
+        check_useful_c_ptr!(out_ss);
+        let key = handle.load()?;
+        let (ss, ct) = key.encapsulate()?;
+        unsafe { *out_ss = SecretBuffer::from_secret(ss) };
+        unsafe { *out_ct = SecretBuffer::from_secret(ct) };
+        Ok(ErrorCode::Success)
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn askar_key_decapsulate(
+    handle: LocalKeyHandle,
+    ct: ByteBuffer,
+    out: *mut SecretBuffer,
+) -> ErrorCode {
+    catch_err! {
+        trace!("Key decapsulate: {}", handle);
+        check_useful_c_ptr!(out);
+        let key = handle.load()?;
+        let ss = key.decapsulate(ct.as_slice())?;
+        unsafe { *out = SecretBuffer::from_secret(ss) };
+        Ok(ErrorCode::Success)
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn askar_key_verify_signature(
     handle: LocalKeyHandle,
     message: ByteBuffer,

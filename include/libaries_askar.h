@@ -306,6 +306,10 @@ ErrorCode askar_key_crypto_box_seal_open(LocalKeyHandle handle,
                                          struct ByteBuffer ciphertext,
                                          struct SecretBuffer *out);
 
+ErrorCode askar_key_decapsulate(LocalKeyHandle handle,
+                                struct ByteBuffer ct,
+                                struct SecretBuffer *out);
+
 ErrorCode askar_key_derive_ecdh_1pu(FfiStr alg,
                                     LocalKeyHandle ephem_key,
                                     LocalKeyHandle sender_key,
@@ -325,6 +329,10 @@ ErrorCode askar_key_derive_ecdh_es(FfiStr alg,
                                    struct ByteBuffer apv,
                                    int8_t receive,
                                    LocalKeyHandle *out);
+
+ErrorCode askar_key_encapsulate(LocalKeyHandle handle,
+                                struct SecretBuffer *out_ss,
+                                struct SecretBuffer *out_ct);
 
 ErrorCode askar_key_entry_list_count(KeyEntryListHandle handle, int32_t *count);
 
@@ -410,7 +418,7 @@ ErrorCode askar_key_wrap_key(LocalKeyHandle handle,
                              struct EncryptedBuffer *out);
 
 /**
- * Migrate an sqlite wallet from an indy-sdk structure to an aries-askar structure.
+ * Migrate an sqlite wallet from an indy-sdk structure to an Askar structure.
  * It is important to note that this does not do any post-processing. If the record values, tags,
  * names, etc. have changed, it must be processed manually afterwards. This script does the following:
  *
