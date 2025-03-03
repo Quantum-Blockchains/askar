@@ -99,6 +99,16 @@ def test_mldsa44():
     assert jwk["crv"] == "ML-DSA-44"
 
 
+def test_mlkme512():
+    key = Key.generate(KeyAlg.ML_KEM_512)
+    assert key.algorithm == KeyAlg.ML_KEM_512
+
+    ss1, ct = key.encapsulate()
+    ss2 = key.decapsulate(ct)
+
+    assert ss1 == ss2
+
+
 @pytest.mark.parametrize(
     "key_alg",
     [KeyAlg.K256, KeyAlg.P256, KeyAlg.P384],

@@ -798,11 +798,12 @@ def key_encapsulate(handle: LocalKeyHandle) -> tuple[ByteBuffer, ByteBuffer]:
     ct = ByteBuffer()
     invoke(
         "askar_key_encapsulate",
-        (LocalKeyHandle, POINTER((ByteBuffer, ByteBuffer))),
+        (LocalKeyHandle, POINTER(ByteBuffer), POINTER(ByteBuffer)),
         handle,
-        byref(ss, ct),
+        byref(ss), 
+        byref(ct),
     )
-    return [ss, ct]
+    return (ss, ct)
 
 
 def key_decapsulate(handle: LocalKeyHandle, ct: Union[bytes, ByteBuffer]) -> ByteBuffer:

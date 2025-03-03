@@ -47,14 +47,6 @@ class Key:
         return cls(bindings.key_from_jwk(jwk))
 
     @classmethod
-    def encapsulate(cls) -> tuple[bytes, bytes]:
-        return cls(bindings.encapsulate())
-    
-    @classmethod
-    def decapsulate(cls, ct: bytes) -> bytes:
-        return cls(bindings.decapsulate(ct))
-
-    @classmethod
     def get_supported_backends(cls) -> Sequence[str]:
         return bindings.key_get_supported_backends()
 
@@ -115,13 +107,13 @@ class Key:
         return bytes(
             bindings.key_aead_decrypt(self._handle, ciphertext, nonce, tag, aad)
         )
-
+    
     def sign_message(self, message: Union[str, bytes], sig_type: str = None) -> bytes:
         return bytes(bindings.key_sign_message(self._handle, message, sig_type))
     
     def encapsulate(self) -> tuple[bytes, bytes]:
-        ssct = bytes(bindings.key_encapsulate(self._handle))
-        return [bytes(ssct[0]), bytes[ssct[1]]]
+        ss, ct = bindings.key_encapsulate(self._handle)
+        return (bytes(ss), bytes(ct))
     
     def decapsulate(self, ct: Union[str, bytes]) -> bytes:
         return bytes(bindings.key_decapsulate(self._handle, ct))
